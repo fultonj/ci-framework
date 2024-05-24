@@ -1,0 +1,150 @@
+---
+remote_base_dir: "/home/zuul/src/github.com/openstack-k8s-operators"
+cifmw_reproducer_repositories:
+  - src: "{{ local_base_dir }}/ci-framework"
+    dest: "{{ remote_base_dir }}/"
+  - src: "https://github.com/fultonj/architecture"
+    dest: "{{ remote_base_dir }}/architecture"
+    version: rgw_test
+
+cifmw_deploy_architecture: true
+
+# use tests from unigama but add deployerInput as per
+# https://bugzilla.redhat.com/show_bug.cgi?id=1383369
+cifmw_tempest_tempestconf_config:
+    deployerInput: |
+          [auth]
+          tempest_roles = member,creator
+          admin_username = admin
+          admin_project_name = admin
+          admin_domain_name = Default
+          [object-storage]
+          operator_role = swiftoperator
+          reseller_admin_role = ResellerAdmin  
+    overrides: 'object-storage-feature-enabled.discoverability false
+
+        compute-feature-enabled.attach_encrypted_volume true
+
+        compute-feature-enabled.live_migration true
+
+        compute-feature-enabled.volume_multiattach true
+
+        volume-feature-enabled.extend_attached_volume true
+
+        volume-feature-enabled.volume_revert true
+
+        volume.volume_type_multiattach multiattach
+
+        share.capability_storage_protocol CEPHFS
+
+        share.run_share_group_tests False
+
+        share.suppress_errors_in_cleanup True
+
+        share.enable_cephx_rules_for_protocols cephfs
+
+        share.storage_protocol CEPHFS
+
+        share.enable_cert_rules_for_protocols ""
+
+        share.enable_ip_rules_for_protocols ""
+
+        share.storage_network storage
+
+        ds_neutron_plugin_options.mechanism_driver ovn
+
+        neutron_plugin_options.available_type_drivers geneve
+
+        '
+    remove: 'network-feature-enabled.api_extensions dhcp_agent_scheduler,qos,trunk
+
+        '
+cifmw_test_operator_tempest_exclude_list: '^tempest.api.compute.admin.test_auto_allocate_network.AutoAllocateNetworkTest.test_server_multi_create_auto_allocate
+
+    ^tempest.api.compute.admin.test_live_migration.LiveMigrationTest.test_live_block_migration_paused
+
+    ^tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test.test_live_block_migration_paused
+
+    ^tempest.api.compute.admin.test_live_migration.LiveMigrationRemoteConsolesV26Test.test_live_block_migration_paused
+
+    ^neutron_plugin.tests.scenario.test_sriov.*
+
+    ^neutron_plugin.tests.scenario.test_l3ha_ovn.*
+
+    ^neutron_plugin.tests.scenario.test_provider_network.*
+
+    ^neutron_plugin.tests.scenario.test_multicast.MulticastTestIPv4Sriov.*
+
+    ^neutron_plugin.tests.scenario.test_qos.QosTestSriov.*
+
+    test_multicast.*restart
+
+    ^neutron_plugin.*test_qos_user_policies
+
+    ^neutron_plugin.tests.scenario.test_qos.QosTestExternalNetwork.*
+
+    ^neutron_plugin.*many_vms
+
+    ^neutron_plugin.*test_previously_used_ip
+
+    ^neutron_plugin.tests.scenario.test_ovn_dbs.OvnDbsMonitoringTest.*
+
+    ^neutron_tempest_plugin.*test_port_forwarding_to_2_fixed_ips
+
+    ^neutron_plugin.tests.scenario.test_internal_dns.InternalDNSInterruptions.*
+
+    ^neutron_plugin.*reboot_node
+
+    ^neutron_plugin.*networker_reboot
+
+    ^neutron_plugin.*ovn_controller_restart
+
+    test_encrypted_cinder_volumes_cryptsetup
+
+    '
+cifmw_test_operator_tempest_include_list: '^barbican_tempest_plugin.tests.scenario
+
+    ^tempest.(api.compute|scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_resize)
+
+    ^tempest.scenario.test_dashboard_basic_ops.TestDashboardBasicOps.test_basic_scenario
+
+    ^tempest.api.image.*
+
+    ^tempest.scenario.test_stamp_pattern.*
+
+    ^tempest.scenario.test_snapshot_pattern.*
+
+    ^manila_tempest_tests
+
+    ^tempest.api.network.*
+
+    ^tempest.scenario.test_network_advanced_server_ops
+
+    ^tempest.scenario.test_network_basic_ops
+
+    ^tempest.scenario.test_network_v6
+
+    ^tempest.scenario.test_security_groups_basic_ops
+
+    ^neutron_tempest_plugin.*
+
+    ^neutron_plugin.*
+
+    ^tempest.api.object_storage.*
+
+    ^tempest.scenario.test_object_storage_basic_ops.*
+
+    ^tempest.api.volume.*
+
+    ^tempest.scenario.test_encrypted_cinder_volumes.*
+
+    ^tempest.scenario.test_minimum_basic.*
+
+    ^tempest.scenario.test_stamp_pattern.*
+
+    ^tempest.scenario.test_volume_.*
+
+    ^cinder_tempest_plugin.*
+
+    '
+cifmw_test_operator_timeout: 144000

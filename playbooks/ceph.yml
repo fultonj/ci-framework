@@ -201,7 +201,8 @@
   roles:
     - role: cifmw_ceph_spec
       cifmw_ceph_spec_host_to_ip: "{{ host_to_ip }}"
-      cifmw_ceph_spec_public_network: "{{ storage_network_range | default(ssh_network_range) }}"
+      cifmw_ceph_spec_public_network: "{{ ssh_network_range }}"
+      #cifmw_ceph_spec_public_network: "{{ storage_network_range | default(ssh_network_range) }}"
       cifmw_ceph_spec_private_network: "{{ storage_mgmt_network_range | default('') }}"
 
 - name: Fetch network facts of all computes

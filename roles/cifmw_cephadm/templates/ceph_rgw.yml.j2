@@ -4,9 +4,7 @@ service_id: rgw
 service_name: rgw.rgw
 placement:
   hosts:
-{% for host in _hosts %}
-  - {{ host }}
-{% endfor %}
+  - {{ _hosts[0] }}
 networks:
 - {{ cifmw_cephadm_rgw_network }}
 spec:
