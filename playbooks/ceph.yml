@@ -322,11 +322,13 @@
         cidr: 64
 
     - name: Generate a cephx key
+      tags: cephx
       cephx_key:
       register: cephx
       no_log: true
 
     - name: Set cifmw_cephadm_keys with the cephx key and cifmw_cephadm_pools
+      tags: cephx
       ansible.builtin.set_fact:
         cifmw_cephadm_keys:
           - name: client.openstack
