@@ -1199,3 +1199,9 @@ cifmw_networking_definition:
       networks:
         ctlplane:
           ip: "192.168.125.9"
+
+cifmw_ceph_daemons_layout:
+    ceph_nfs_enabled: false
+    cephfs_enabled: true
+    dashboard_enabled: false
+    rgw_enabled: false

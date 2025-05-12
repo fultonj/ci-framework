@@ -1,0 +1,165 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Deploy multiple Ceph clusters in parallel using this wrapper to ceph.yml
+# Called in post_stage_run from architecture automation vars/bgp-l3-xl-ceph.yaml
+
+- name: Deploy multiple Ceph clusters in parallel
+  hosts: localhost
+  gather_facts: false
+  vars:
+    clusters:
+      - _az: az0
+        _rack: r0
+        _group_name: r0-computes
+        _subnet_network_range: 192.168.122.0/24
+        _storage_network_range: 192.168.122.0/24
+        _storage_mgmt_network_range: 192.168.122.0/24
+        #_storage_network_range: 172.18.0.0/24
+        #_storage_mgmt_network_range: 172.18.0.0/24
+      - _az: az1
+        _rack: r1
+        _group_name: r1-computes
+        _subnet_network_range: 192.168.123.0/24
+        _storage_network_range: 192.168.123.0/24
+        _storage_mgmt_network_range: 192.168.123.0/24
+        #_storage_network_range: 172.18.0.0/24
+        #_storage_mgmt_network_range: 172.18.0.0/24
+      - _az: az2
+        _rack: r2
+        _group_name: r2-computes
+        _subnet_network_range: 192.168.124.0/24
+        _storage_network_range: 192.168.124.0/24
+        _storage_mgmt_network_range: 192.168.124.0/24
+        #_storage_network_range: 172.18.0.0/24
+        #_storage_mgmt_network_range: 172.18.0.0/24
+    _arch: /home/zuul/src/github.com/openstack-k8s-operators/architecture
+    _common_vars: ~/reproducer-variables.yml
+    _inv: ~/reproducer-inventory
+    cifmw_cephadm_pools:
+      - name: vms
+        pg_autoscale_mode: true
+        target_size_ratio: 0.2
+        application: rbd
+      - name: volumes
+        pg_autoscale_mode: true
+        target_size_ratio: 0.3
+        application: rbd
+        trash_purge_enabled: true
+      - name: backups
+        pg_autoscale_mode: true
+        target_size_ratio: 0.1
+        application: rbd
+      - name: images
+        target_size_ratio: 0.2
+        pg_autoscale_mode: true
+        application: rbd
+      - name: cephfs.cephfs.meta
+        target_size_ratio: 0.1
+        pg_autoscale_mode: true
+        application: cephfs
+      - name: cephfs.cephfs.data
+        target_size_ratio: 0.1
+        pg_autoscale_mode: true
+        application: cephfs
+  tasks:
+    # all three clusters will share this key for this usecase
+    - name: Generate a cephx key
+      cifmw.general.cephx_key:
+      register: cephx
+      no_log: true
+
+    - name: Set cifmw_cephadm_keys with the cephx key and cifmw_cephadm_pools
+      ansible.builtin.set_fact:
+        cifmw_cephadm_keys:
+          - name: client.openstack
+            key: "{{ cephx.key }}"
+            mode: '0600'
+            caps:
+              mgr: allow *
+              mon: profile rbd
+              osd: "{{ pools | map('regex_replace', '^(.*)$',
+                                   'profile rbd pool=\\1') | join(', ') }}"
+      vars:
+        pools: "{{ cifmw_cephadm_pools | map(attribute='name') | list }}"
+      no_log: true
+
+    - name: Create shared cephx variable file
+      vars:
+        _content:
+          cifmw_cephadm_keys: "{{ cifmw_cephadm_keys }}"
+      ansible.builtin.copy:
+        mode: "0644"
+        dest: "~/ci-framework-data/parameters/cephx.yml"
+        content: "{{ _content | to_nice_yaml }}"
+
+    - name: Create Ceph playbook variables files
+      vars:
+        _content:
+          cifmw_cephadm_cluster: "{{ item._az }}"
+          cifmw_ceph_target: "{{ item._group_name }}"
+          ssh_network_range: "{{ item._subnet_network_range }}"
+          storage_network_range: "{{ item._storage_network_range | ansible.utils.ipaddr('network/prefix') }}"
+          storage_mgmt_network_range: "{{ item._storage_mgmt_network_range | ansible.utils.ipaddr('network/prefix') }}"
+          cifmw_ceph_client_values_post_ceph_path_src: "{{ _arch }}/examples/dt/bgp-l3-xl-ceph/edpm-post-ceph/nova-ceph/{{ item._rack }}/values.yaml"
+          cifmw_ceph_client_values_post_ceph_path_dst: "{{ _arch }}/examples/dt/bgp-l3-xl-ceph/edpm-post-ceph/nova-ceph/{{ item._rack }}/values.yaml"
+          cifmw_ceph_spec_data_devices: >-
+            data_devices:
+              all: true
+          cifmw_ceph_client_vars: "/tmp/ceph_client_{{ item._az }}.yml"
+      ansible.builtin.copy:
+        mode: "0644"
+        dest: "~/ci-framework-data/parameters/ceph-{{ item._az }}.yml"
+        content: "{{ _content | to_nice_yaml }}"
+      loop: "{{ clusters }}"
+
+    - name: Launch Ceph cluster deployments in parallel
+      ansible.builtin.command: >
+        echo ansible-playbook -i {{ _inv }} ceph.yml -e @{{ _common_vars }} -e @~/ci-framework-data/parameters/ceph-{{ item._az }}.yml -e @~/ci-framework-data/parameters/cephx.yml --skip-tags=block,cephx
+      async: 3600
+      poll: 0
+      loop: "{{ clusters }}"
+      register: async_launch
+      changed_when: false
+
+    - name: Wait for all deployments to complete
+      ansible.builtin.async_status:
+        jid: "{{ item.ansible_job_id }}"
+      loop: "{{ async_launch.results }}"
+      register: async_results
+      until: async_results.finished
+      retries: 360
+      delay: 10
+      ignore_errors: true
+
+    - name: Show deployment results
+      ansible.builtin.debug:
+        msg: "{{ item.item.item._az }}: {{ 'Success' if not item.failed else 'Failed' }}"
+      loop: "{{ async_results.results }}"
+      loop_control:
+        label: "{{ item.item.item._az }}"
+
+    - name: Fail if any deployments failed
+      ansible.builtin.fail:
+        var: item
+      when: item.failed
+      loop: "{{ async_results.results }}"
+      loop_control:
+        label: "{{ item.item.item._az }}"
+
+    - name: Fail early
+      ansible.builtin.fail:
+        msg: "testing"
