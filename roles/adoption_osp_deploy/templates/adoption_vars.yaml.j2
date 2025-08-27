@@ -18,6 +18,31 @@ source_mariadb_ip: {{ _controller_1_internalapi_ip }}
 source_ovndb_ip: {{ _controller_1_internalapi_ip }}
 edpm_node_hostname: {{ _compute_1_name }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}
 edpm_node_ip: {{ _compute_1_ip }}
+
+{% if _vm_groups['osp-computes'] | default([]) | length > 0 %}
+edpm_computes: |
+  {% for compute in _vm_groups['osp-computes'] %}
+  {% set node_nets = cifmw_networking_env_definition.instances[compute] %}
+  ["{{ compute }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}"]="{{ node_nets.networks.ctlplane[ip_version|default('ip_v4')] }}"
+  {% endfor %}
+{% endif %}
+
+{% if _vm_groups['osp-dcn1-compute-az1s'] | default([]) | length > 0 %}
+edpm_computes_dcn1: |
+  {% for compute in _vm_groups['osp-dcn1-compute-az1s'] %}
+  {% set node_nets = cifmw_networking_env_definition.instances[compute] %}
+  ["{{ compute }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}"]="{{ node_nets.networks.ctlplanedcn1[ip_version|default('ip_v4')] }}"
+  {% endfor %}
+{% endif %}
+
+{% if _vm_groups['osp-dcn1-compute-az2s'] | default([]) | length > 0 %}
+edpm_computes_dcn2: |
+  {% for compute in _vm_groups['osp-dcn1-compute-az2s'] %}
+  {% set node_nets = cifmw_networking_env_definition.instances[compute] %}
+  ["{{ compute }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}"]="{{ node_nets.networks.ctlplanedcn2[ip_version|default('ip_v4')] }}"
+  {% endfor %}
+{% endif %}
+
 {% if _vm_groups['osp-networkers'] | default([]) | length > 0 %}
 edpm_networkers: |
   {% for networker in _vm_groups['osp-networkers'] | default([]) %}
@@ -51,6 +76,8 @@ source_galera_members: |
   {% endfor %}
 {%+ endif +%}
 
+# TODO: dcn computes
+{% if _vm_groups['osp-computes'] | default([]) | length > 0 %}
 edpm_nodes:
 {% for stack in _stack_names %}
   {% if stack == 'overcloud' %}

@@ -49,3 +49,19 @@ computes:
       ansible_host: {{ node_nets.networks.ctlplane[ip_version|default('ip_v4')] }}
     {% endfor %}
     {% endfor %}
+    {% for group in ['osp-dcn1-compute-az1s'] %}
+    {% for node in _vm_groups[group] %}
+    {% set node_nets = cifmw_networking_env_definition.instances[node] %}
+    {{ node }}:
+      ansible_user: tripleo-admin
+      ansible_host: {{ node_nets.networks.ctlplanedcn1[ip_version|default('ip_v4')] }}
+    {% endfor %}
+    {% endfor %}
+    {% for group in ['osp-dcn1-compute-az2s'] %}
+    {% for node in _vm_groups[group] %}
+    {% set node_nets = cifmw_networking_env_definition.instances[node] %}
+    {{ node }}:
+      ansible_user: tripleo-admin
+      ansible_host: {{ node_nets.networks.ctlplanedcn2[ip_version|default('ip_v4')] }}
+    {% endfor %}
+    {% endfor %}
