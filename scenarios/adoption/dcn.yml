@@ -136,27 +136,27 @@ networking_mapper_definition_patch:
           start: 111
           length: 10
       networks:
-        ctlplanedcn1: {}
-        internalapidcn1:
-          trunk-parent: ctlplanedcn1
-        tenantdcn1:
-          trunk-parent: ctlplanedcn1
-        storagedcn1:
-          trunk-parent: ctlplanedcn1
-        storagemgmtdcn1:
-          trunk-parent: ctlplanedcn1
+        ctlplane: {}
+        internalapi:
+          trunk-parent: ctlplane
+        tenant:
+          trunk-parent: ctlplane
+        storage:
+          trunk-parent: ctlplane
+        storagemgmt:
+          trunk-parent: ctlplane
     osp-dcn2-compute-az2s:
       network-template:
         range:
           start: 121
           length: 10
       networks:
-        ctlplanedcn2: {}
-        internalapidcn2:
-          trunk-parent: ctlplanedcn2
-        tenantdcn2:
-          trunk-parent: ctlplanedcn2
-        storagedcn2:
-          trunk-parent: ctlplanedcn2
-        storagemgmtdcn2:
-          trunk-parent: ctlplanedcn2
+        ctlplane: {}
+        internalapi:
+          trunk-parent: ctlplane
+        tenant:
+          trunk-parent: ctlplane
+        storage:
+          trunk-parent: ctlplane
+        storagemgmt:
+          trunk-parent: ctlplane
