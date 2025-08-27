@@ -12,6 +12,22 @@ edpm_computes: |
   {% endfor %}
 {% endif %}
 
+{% if _vm_groups['osp-dcn1-compute-az1s'] | default([]) | length > 0 %}
+edpm_computes_dcn1: |
+  {% for compute in _vm_groups['osp-dcn1-compute-az1s'] %}
+  {% set node_nets = cifmw_networking_env_definition.instances[compute] %}
+  ["{{ compute }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}"]="{{ node_nets.networks.ctlplanedcn1[ip_version|default('ip_v4')] }}"
+  {% endfor %}
+{% endif %}
+
+{% if _vm_groups['osp-dcn1-compute-az2s'] | default([]) | length > 0 %}
+edpm_computes_dcn2: |
+  {% for compute in _vm_groups['osp-dcn1-compute-az2s'] %}
+  {% set node_nets = cifmw_networking_env_definition.instances[compute] %}
+  ["{{ compute }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}"]="{{ node_nets.networks.ctlplanedcn2[ip_version|default('ip_v4')] }}"
+  {% endfor %}
+{% endif %}
+
 {% if _vm_groups['osp-networkers'] | default([]) | length > 0 %}
 edpm_networkers: |
   {% for networker in _vm_groups['osp-networkers'] | default([]) %}
@@ -26,6 +42,7 @@ source_galera_members: |
   ["{{ controller }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}"]="{{ node_nets.networks.internalapi[ip_version|default('ip_v4')] }}"
   {% endfor %}
 
+# TODO: dcn computes
 {% if _vm_groups['osp-computes'] | default([]) | length > 0 %}
 edpm_nodes:
   {% for compute in _vm_groups['osp-computes'] %}
