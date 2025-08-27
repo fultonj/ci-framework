@@ -7,10 +7,6 @@ _osp_img_data: &osp_base_conf
 
 libvirt_manager_patch_layout:
   vms:
-    # Let's remove the default computes, since we want to adopt the
-    # OSP ones
-    compute:
-      amount: 0
     osp-undercloud:
       <<: *osp_base_conf
       amount: 1
@@ -26,6 +22,21 @@ libvirt_manager_patch_layout:
       disksize: 50
       memory: 8
       cpus: 4
+      nets:
+        - ocpbm
+        - osp_trunk
+    # Let's remove the default computes, since we want to adopt the
+    # OSP ones
+    compute:
+      amount: 0
+    osp-compute:
+      <<: *osp_base_conf
+      amount: "{{ [cifmw_libvirt_manager_compute_amount|int, 3] | max }}"
+      extra_disks_num: 3
+      extra_disks_size: 15G
+      disksize: "{{ [cifmw_libvirt_manager_compute_disksize|int, 50] | max }}"
+      memory: "{{ [cifmw_libvirt_manager_compute_memory|int, 8] | max }}"
+      cpus: "{{ [cifmw_libvirt_manager_compute_cpus|int, 4] | max }}"
       nets:
         - ocpbm
         - osp_trunk
