@@ -73,6 +73,79 @@ networking_mapper_definition_patch:
       network: "10.0.0.0/24"
       vlan: 44
       mtu: 1496
+    ctlplane0:
+      network: "192.168.122.0/24"
+      is_trunk_parent: true
+      mtu: 1500
+    ctlplane1:
+      network: "192.168.133.0/24"
+      is_trunk_parent: true
+      mtu: 1500
+    ctlplane2:
+      network: "192.168.144.0/24"
+      is_trunk_parent: true
+      mtu: 1500
+    internalapi0:
+      network: "172.17.0.0/24"
+      vlan: 20
+      mtu: 1496
+      trunk-parent: ctlplane0
+    internalapi1:
+      network: "172.17.10.0/24"
+      vlan: 30
+      mtu: 1496
+      trunk-parent: ctlplane1
+    internalapi2:
+      network: "172.17.20.0/24"
+      vlan: 40
+      mtu: 1496
+      trunk-parent: ctlplane2
+    tenant0:
+      network: "172.19.0.0/24"
+      vlan: 22
+      mtu: 1496
+      trunk-parent: ctlplane0
+    tenant1:
+      network: "172.19.10.0/24"
+      vlan: 32
+      mtu: 1496
+      trunk-parent: ctlplane1
+    tenant2:
+      network: "172.19.20.0/24"
+      vlan: 42
+      mtu: 1496
+      trunk-parent: ctlplane2
+    storage0:
+      network: "172.18.0.0/24"
+      vlan: 21
+      mtu: 1496
+      trunk-parent: ctlplane0
+    storage1:
+      network: "172.18.10.0/24"
+      vlan: 31
+      mtu: 1496
+      trunk-parent: ctlplane1
+    storage2:
+      network: "172.18.20.0/24"
+      vlan: 41
+      mtu: 1496
+      trunk-parent: ctlplane2
+    storagemgmt0:
+      network: "172.20.0.0/24"
+      vlan: 23
+      mtu: 1496
+      trunk-parent: ctlplane0
+    storagemgmt1:
+      network: "172.20.10.0/24"
+      vlan: 33
+      mtu: 1496
+      trunk-parent: ctlplane1
+    storagemgmt2:
+      network: "172.20.20.0/24"
+      vlan: 43
+      mtu: 1496
+      trunk-parent: ctlplane2
+
   group-templates:
     computes:
       network-template:
@@ -98,32 +171,24 @@ networking_mapper_definition_patch:
           start: 103
           length: 3
       networks: &osp_nets
-        ctlplane: {}
+        ctlplane0: {}
         external:
-          trunk-parent: ctlplane
-        internalapi:
-          trunk-parent: ctlplane
-        tenant:
-          trunk-parent: ctlplane
-        storage:
-          trunk-parent: ctlplane
-        storagemgmt:
-          trunk-parent: ctlplane
+          trunk-parent: ctlplane0
+        internalapi0: {}
+        tenant0: {}
+        storage0: {}
+        storagemgmt0: {}
     osp-computes:
       network-template:
         range:
           start: 106
           length: 3
       networks:
-        ctlplane: {}
-        internalapi:
-          trunk-parent: ctlplane
-        tenant:
-          trunk-parent: ctlplane
-        storage:
-          trunk-parent: ctlplane
-        storagemgmt:
-          trunk-parent: ctlplane
+        ctlplane0: {}
+        internalapi0: {}
+        tenant0: {}
+        storage0: {}
+        storagemgmt0: {}
     osp-underclouds:
       network-template:
         range:
@@ -136,27 +201,19 @@ networking_mapper_definition_patch:
           start: 111
           length: 10
       networks:
-        ctlplane: {}
-        internalapi:
-          trunk-parent: ctlplane
-        tenant:
-          trunk-parent: ctlplane
-        storage:
-          trunk-parent: ctlplane
-        storagemgmt:
-          trunk-parent: ctlplane
+        ctlplane1: {}
+        internalapi1: {}
+        tenant1: {}
+        storage1: {}
+        storagemgmt1: {}
     osp-dcn2-compute-az2s:
       network-template:
         range:
           start: 121
           length: 10
       networks:
-        ctlplane: {}
-        internalapi:
-          trunk-parent: ctlplane
-        tenant:
-          trunk-parent: ctlplane
-        storage:
-          trunk-parent: ctlplane
-        storagemgmt:
-          trunk-parent: ctlplane
+        ctlplane2: {}
+        internalapi2: {}
+        tenant2: {}
+        storage2: {}
+        storagemgmt2: {}
