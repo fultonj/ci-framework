@@ -90,7 +90,7 @@
     - name: Generate DeployedServerPortMap field
       vars:
         _node_instance_net: "{{ cifmw_networking_env_definition.instances[node] }}"
-        _key_name: "{{ node }}-ctlplane"
+        _key_name: "{{ node }}-{{_stack.ctlplanenet|default('ctlplane')}}"
         _ctlplane_ip: "{{ _node_instance_net.networks[_stack.ctlplanenet|default('ctlplane')][ip_version|default('ip_v4')] }}"
         _server_port: >-
           {%- set port = {_key_name: {}} -%}
