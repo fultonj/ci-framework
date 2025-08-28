@@ -83,7 +83,8 @@
       vars:
         _node_instance_net: "{{ cifmw_networking_env_definition.instances[node] }}"
         _key_name: "{{ node }}-ctlplane"
-        _ctlplane_ip: "{{ _node_instance_net.networks.ctlplane[ip_version|default('ip_v4')] }}"
+        ctlplane: "{{ cifmw_adoption_osp_deploy_scenario.ctlplane_groups_map[group]|default('ctlplane') }}"
+        _ctlplane_ip: "{{ _node_instance_net.networks[ctlplane][ip_version|default('ip_v4')] }}"
         _server_port: >-
           {%- set port = {_key_name: {}} -%}
           {%- set _ = port[_key_name].update({
