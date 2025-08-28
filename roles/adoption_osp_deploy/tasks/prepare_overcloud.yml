@@ -21,6 +21,10 @@
       - user_id
       - user_dir
 
+- name: Reset facts
+  ansible.builtin.set_fact:
+    _tripleo_nodes_stack: []
+
 - name: Prepare enviornment for 17.1 overcloud deployment
   vars:
     _overcloud_name: >-
