@@ -1,5 +1,6 @@
 #jinja2: trim_blocks:True, lstrip_blocks:True
-{% for group, role in cifmw_adoption_osp_deploy_scenario.roles_groups_map.items() %}
+{% for group in _stack.stack_nodes %}
+  {% set role = cifmw_adoption_osp_deploy_scenario.roles_groups_map[group] %}
 {{ role }}:
   hosts:
     {% for node in _vm_groups[group] %}
@@ -41,7 +42,7 @@ computes:
 {% endif %}
 {{ _overcloud_name }}:
   hosts:
-    # TODO: why controlles too?
+    # TODO: why controllers too?
     {% for group in _stack.stack_nodes %}
     {% for node in _vm_groups[group] %}
     {% set node_nets = cifmw_networking_env_definition.instances[node] %}
