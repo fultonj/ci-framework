@@ -2,13 +2,12 @@
 {% for group, role in cifmw_adoption_osp_deploy_scenario.roles_groups_map.items() %}
 {{ role }}:
   hosts:
-    {% set ctlplane = cifmw_adoption_osp_deploy_scenario.ctlplane_groups_map[group]|default('ctlplane') %}
     {% for node in _vm_groups[group] %}
     {% set node_nets = cifmw_networking_env_definition.instances[node] %}
     {{ node }}:
-      ansible_host: {{ node_nets.networks[ctlplane][ip_version|default('ip_v4')] }}
+      ansible_host: {{ node_nets.networks[_ctlplane][ip_version|default('ip_v4')] }}
       canonical_hostname: {{ node }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}
-      ctlplane_ip: {{ node_nets.networks[ctlplane][ip_version|default('ip_v4')] }}
+      ctlplane_ip: {{ node_nets.networks[_ctlplane][ip_version|default('ip_v4')] }}
       {% for network_name, net in node_nets.networks.items() %}
       {% if 'vlan_id' in net %}
         {% set net_name = ['storage_mgmt'] if network_name == 'storagemgmt' else [network_name] %}
@@ -44,11 +43,10 @@ computes:
   hosts:
     # TODO: why controlles too?
     {% for group in ['osp-controllers', 'osp-computes', 'osp-dcn1-compute-az1s', 'osp-dcn2-compute-az2s'] %}
-    {% set ctlplane = cifmw_adoption_osp_deploy_scenario.ctlplane_groups_map[group]|default('ctlplane') %}
     {% for node in _vm_groups[group] %}
     {% set node_nets = cifmw_networking_env_definition.instances[node] %}
     {{ node }}:
       ansible_user: tripleo-admin
-      ansible_host: {{ node_nets.networks[ctlplane][ip_version|default('ip_v4')] }}
+      ansible_host: {{ node_nets.networks[_ctlplane][ip_version|default('ip_v4')] }}
     {% endfor %}
     {% endfor %}
