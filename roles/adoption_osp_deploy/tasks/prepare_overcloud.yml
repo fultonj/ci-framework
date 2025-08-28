@@ -61,7 +61,7 @@
     _source_cmd: "source {{ ansible_user_dir }}/stackrc"
     _network_provision_output: "network_provision_{{ _overcloud_name }}_out.yaml"
     _vips_provision_output: "vips_provision_{{ _overcloud_name }}_out.yaml"
-    _ctlplane: "{{ cifmw_networking_env_definition.networks[_stack.ctlplanenet|default('ctlplane')] }}"
+    _ctlplane: "{{ _stack.ctlplanenet|default('ctlplane') }}"
   block:
     - name: "Gather nodes for stack {{ _overcloud_name }}"
       when: group.key is in _hostname_map_translation
