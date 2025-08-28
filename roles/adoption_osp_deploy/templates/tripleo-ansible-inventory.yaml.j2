@@ -42,7 +42,7 @@ computes:
 {{ _overcloud_name }}:
   hosts:
     # TODO: why controlles too?
-    {% for group in ['osp-controllers', 'osp-computes', 'osp-dcn1-compute-az1s', 'osp-dcn2-compute-az2s'] %}
+    {% for group in _stack.stack_nodes %}
     {% for node in _vm_groups[group] %}
     {% set node_nets = cifmw_networking_env_definition.instances[node] %}
     {{ node }}:
