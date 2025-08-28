@@ -34,15 +34,13 @@ allovercloud:
     {% endfor %}
 computes:
   children:
-{% if _role_map_translation['osp-computes'] | default([]) | length > 0 %}
-    {{ _role_map_translation['osp-computes'] }}: {}
-{% endif %}
-{% if _role_map_translation[_overcloud_name ~ '-osp-computes'] | default([]) | length > 0 %}
-    {{ _role_map_translation[_overcloud_name ~ '-osp-computes'] }}: {}
-{% endif %}
+    {% for group in _stack.stack_nodes %}
+      {% if 'computes' in group %}
+    {{ cifmw_adoption_osp_deploy_scenario.roles_groups_map[group] }}: {}
+      {% endif %}
+    {% endfor %}
 {{ _overcloud_name }}:
   hosts:
-    # TODO: why controllers too?
     {% for group in _stack.stack_nodes %}
     {% for node in _vm_groups[group] %}
     {% set node_nets = cifmw_networking_env_definition.instances[node] %}
