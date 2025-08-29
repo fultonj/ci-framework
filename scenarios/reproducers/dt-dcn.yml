@@ -178,6 +178,7 @@ cifmw_libvirt_manager_configuration:
 cifmw_networking_definition:
   networks:
     ctlplanedcn1:
+      tripleo_network_name: ctlplane
       network: "192.168.133.0/24"
       gateway: "192.168.133.1"
       dns:
@@ -199,6 +200,7 @@ cifmw_networking_definition:
             - start: 80
               end: 90
     ctlplanedcn2:
+      tripleo_network_name: ctlplane
       network: "192.168.144.0/24"
       gateway: "192.168.144.1"
       dns:
@@ -259,6 +261,7 @@ cifmw_networking_definition:
             - start: 30
               end: 70
     internalapidcn1:
+      tripleo_network_name: internalapi
       network: "172.17.10.0/24"
       gateway: "172.17.10.1"
       vlan: 30
@@ -277,6 +280,7 @@ cifmw_networking_definition:
             - start: 30
               end: 70
     internalapidcn2:
+      tripleo_network_name: internalapi
       network: "172.17.20.0/24"
       gateway: "172.17.20.1"
       vlan: 40
@@ -313,6 +317,7 @@ cifmw_networking_definition:
             - start: 30
               end: 70
     storagedcn1:
+      tripleo_network_name: storage
       network: "172.18.10.0/24"
       gateway: "172.18.10.1"
       vlan: 31
@@ -331,6 +336,7 @@ cifmw_networking_definition:
             - start: 30
               end: 70
     storagedcn2:
+      tripleo_network_name: storage
       network: "172.18.20.0/24"
       gateway: "172.18.20.1"
       vlan: 41
@@ -360,6 +366,7 @@ cifmw_networking_definition:
         vlan_id: 23
         mtu: 1500
     storagemgmtdcn1:
+      tripleo_network_name: storagemgmt
       network: "172.20.10.0/24"
       gateway: "172.20.10.1"
       vlan: 33
@@ -370,6 +377,7 @@ cifmw_networking_definition:
             - start: 100
               end: 250
     storagemgmtdcn2:
+      tripleo_network_name: storagemgmt
       network: "172.20.20.0/24"
       gateway: "172.20.20.1"
       vlan: 43
@@ -398,6 +406,7 @@ cifmw_networking_definition:
       vlan: 22
       mtu: 1496
     tenantdcn1:
+      tripleo_network_name: tenant
       network: "172.19.10.0/24"
       gateway: "172.19.10.1"
       vlan: 32
@@ -416,6 +425,7 @@ cifmw_networking_definition:
             - start: 30
               end: 70
     tenantdcn2:
+      tripleo_network_name: tenant
       network: "172.19.20.0/24"
       gateway: "172.19.20.1"
       vlan: 42
