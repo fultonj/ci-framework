@@ -229,6 +229,27 @@
       loop_control:
         loop_var: overcloud_vm
 
+    - name: Configure NetworkManager to not override /etc/resolv.conf
+      become: true
+      community.general.ini_file:
+        path: "/etc/NetworkManager/NetworkManager.conf"
+        option: dns
+        section: main
+        value: none
+        mode: "0644"
+      loop: "{{ _tripleo_nodes_stack }}"
+      loop_control:
+        loop_var: overcloud_vm
+
+    - name: Restart NetworkManager to ensure we apply new configuration
+      become: true
+      ansible.builtin.service:
+        name: NetworkManager
+        state: restarted
+      loop: "{{ _tripleo_nodes_stack }}"
+      loop_control:
+        loop_var: overcloud_vm
+
     - name: Configure network interfaces for overcloud nodes
       become: true
       delegate_to: "{{ overcloud_vm }}"
