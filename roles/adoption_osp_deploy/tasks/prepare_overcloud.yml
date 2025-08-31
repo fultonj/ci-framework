@@ -95,6 +95,43 @@
         apply:
           delegate_to: "{{ cifmw_target_host | default('localhost') }}"
 
+    - name: Configure NetworkManager to not override /etc/resolv.conf
+      become: true
+      delegate_to: "{{ overcloud_vm }}"
+      community.general.ini_file:
+        path: "/etc/NetworkManager/NetworkManager.conf"
+        option: dns
+        section: main
+        value: none
+        mode: "0644"
+      loop: "{{ _tripleo_nodes_stack }}"
+      loop_control:
+        loop_var: overcloud_vm
+
+    - name: Restart NetworkManager to ensure we apply new configuration
+      become: true
+      delegate_to: "{{ overcloud_vm }}"
+      ansible.builtin.service:
+        name: NetworkManager
+        state: restarted
+      loop: "{{ _tripleo_nodes_stack }}"
+      loop_control:
+        loop_var: overcloud_vm
+
+    - name: Inject custom nameservers in /etc/resolv.conf
+      become: true
+      delegate_to: "{{ overcloud_vm }}"
+      vars:
+        _ctlplane_net: "{{ cifmw_networking_env_definition.networks[_ctlplane] }}"
+        _dns_server: "{{ _ctlplane_net[dns_version|default('dns_v4')] }}"
+      ansible.builtin.template:
+        src: "resolv.conf.j2"
+        dest: "/etc/resolv.conf"
+        mode: "0644"
+      loop: "{{ _tripleo_nodes_stack }}"
+      loop_control:
+        loop_var: overcloud_vm
+
     - name: Ensure needed logins
       ansible.builtin.include_tasks: login_registries.yml
       args:
@@ -217,7 +254,7 @@
         _node_net: "{{ cifmw_networking_env_definition.instances[overcloud_vm] }}"
         _ctlplane_ip: "{{ _node_net.networks[_ctlplane][ip_version|default('ip_v4')] }}"
         _ctlplane_net: "{{ cifmw_networking_env_definition.networks[_ctlplane] }}"
-        _dns_server: "{{ _ctlplane_net.[dns_version|default('dns_v4')] }}"
+        _dns_server: "{{ _ctlplane_net[dns_version|default('dns_v4')] }}"
         _gateway_ip: "{{ _ctlplane_net[gw_version|default('gw_v4')] }}"
         _interface_mtu: "{{ _node_net.networks[_ctlplane].mtu }}"
         _ctlplane_cidr: "{{ _node_net.networks[_ctlplane][prefix_length_version|default('prefix_length_v4')] }}"
@@ -226,27 +263,6 @@
         dest: /etc/os-net-config/tripleo_config.yaml
         mode: "0644"
       loop: "{{ _tripleo_nodes_stack[_overcloud_name] }}"
-      loop_control:
-        loop_var: overcloud_vm
-
-    - name: Configure NetworkManager to not override /etc/resolv.conf
-      become: true
-      community.general.ini_file:
-        path: "/etc/NetworkManager/NetworkManager.conf"
-        option: dns
-        section: main
-        value: none
-        mode: "0644"
-      loop: "{{ _tripleo_nodes_stack }}"
-      loop_control:
-        loop_var: overcloud_vm
-
-    - name: Restart NetworkManager to ensure we apply new configuration
-      become: true
-      ansible.builtin.service:
-        name: NetworkManager
-        state: restarted
-      loop: "{{ _tripleo_nodes_stack }}"
       loop_control:
         loop_var: overcloud_vm
 
