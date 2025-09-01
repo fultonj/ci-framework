@@ -10,10 +10,11 @@
       canonical_hostname: {{ node }}.{{ cifmw_adoption_osp_deploy_scenario.cloud_domain }}
       ctlplane_ip: {{ node_nets.networks[_ctlplane][ip_version|default('ip_v4')] }}
       {% for network_name, net in node_nets.networks.items() %}
+      {% set network_name = cifmw_networking_definition.networks[network_name].tripleo_network_name|default(network_name) %}
       {% if 'vlan_id' in net %}
-        {% set net_name = ['storage_mgmt'] if network_name == 'storagemgmt' else [network_name] %}
-        {% set net_name = ['internal_api'] if network_name == 'internalapi' else [network_name] %}
-      {{ net_name[0] }}_ip: {{ net[ip_version|default('ip_v4')] }}
+        {% set network_name = 'storage_mgmt' if network_name == 'storagemgmt' else network_name %}
+        {% set network_name = 'internal_api' if network_name == 'internalapi' else network_name %}
+      {{ network_name }}_ip: {{ net[ip_version|default('ip_v4')] }}
       {% endif %}
       {% endfor %}
     {% endfor %}
