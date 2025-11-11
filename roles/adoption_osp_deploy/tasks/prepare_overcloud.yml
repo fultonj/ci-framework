@@ -23,7 +23,7 @@
 
 - name: Reset facts
   ansible.builtin.set_fact:
-    _tripleo_nodes_stack: []
+    _tripleo_nodes_stack: {}
 
 - name: Prepare enviornment for 17.1 overcloud deployment
   vars:
@@ -104,7 +104,7 @@
         section: main
         value: none
         mode: "0644"
-      loop: "{{ _tripleo_nodes_stack }}"
+      loop: "{{ _tripleo_nodes_stack[_overcloud_name] }}"
       loop_control:
         loop_var: overcloud_vm
 
@@ -114,7 +114,7 @@
       ansible.builtin.service:
         name: NetworkManager
         state: restarted
-      loop: "{{ _tripleo_nodes_stack }}"
+      loop: "{{ _tripleo_nodes_stack[_overcloud_name] }}"
       loop_control:
         loop_var: overcloud_vm
 
@@ -128,7 +128,7 @@
         src: "resolv.conf.j2"
         dest: "/etc/resolv.conf"
         mode: "0644"
-      loop: "{{ _tripleo_nodes_stack }}"
+      loop: "{{ _tripleo_nodes_stack[_overcloud_name] }}"
       loop_control:
         loop_var: overcloud_vm
 
