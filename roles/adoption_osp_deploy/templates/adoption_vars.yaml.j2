@@ -96,8 +96,8 @@ edpm_nodes:
         defaultRoute: true
 {% endif %}
     {% endfor %}
-  {%+ endif +%}
-{% endfor %}
+    {% endfor %}
+{% endif %}
 
 {% if _vm_groups['osp-dcn1-compute-az1s'] | default([]) | length > 0 %}
 edpm_nodes_dcn1:
@@ -190,5 +190,5 @@ edpm_nodes_networker:
 
 
 upstream_dns: {{ cifmw_networking_env_definition.networks.ctlplane[dns_version|default('dns_v4')] | first }}
-os_cloud_name: {{ _stack_names[0] }}
+os_cloud_name: {{ cifmw_adoption_osp_deploy_scenario.stacks[0].stackname }}
 standalone_ip: {{ _undercloud_ip }}
