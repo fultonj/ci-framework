@@ -25,6 +25,25 @@ data:
         edpm_fips_mode: "{{ 'enabled' if cifmw_fips_enabled|default(false)|bool else 'check' }}"
         timesync_ntp_servers:
           - hostname: "{{ cifmw_ci_gen_kustomize_values_ntp_srv | default('pool.ntp.org') }}"
+{% if cifmw_architecture_scenario == 'dz-ceph' %}
+{%   if node_type == 'networker' %}
+        edpm_nodes_validation_check_for_fqdn: false
+{%   endif %}
+{%   set network_config = original_content.data.nodeset.ansible.ansibleVars.edpm_network_config_template %}
+{%   set network_config = network_config | replace('  name: nic1\n  use_dhcp: true\n  defroute: false', '  name: nic1\n  use_dhcp: true\n  defroute: true') %}
+{%   set network_config = network_config | replace(
+       'dns_servers: {{ ctlplane_dns_nameservers }}',
+       'dns_servers: {{ (ctlplane_dns_nameservers + ["192.168.111.1"]) | unique | list }}'
+     ) %}
+        edpm_network_config_template: |
+{{ network_config | indent(10, true) }}
+{% endif %}
+        edpm_network_config_os_net_config_mappings:
+{% set ctlplane_rack = 'ctlplane' ~ rack %}
+{% for instance in instances_names %}
+          edpm-{{ instance }}:
+            nic2: "{{ cifmw_networking_env_definition.instances[instance].networks[ctlplane_rack].mac_addr }}"
+{% endfor %}
         edpm_sshd_allowed_ranges:
 {% set sshd_allowed_range = cifmw_ci_gen_kustomize_values_sshd_ranges | default([]) %}
 {% for rack in ['r0', 'r1', 'r2'] %}
@@ -41,8 +60,12 @@ data:
         ansible:
 {%   set ctlplane_rack = 'ctlplane' + rack %}
           ansibleHost: {{ cifmw_networking_env_definition.instances[instance].networks[ctlplane_rack].ip_v4 }}
-{%   if original_content.data.nodeset.nodes['edpm-' ~ instance].ansible.ansibleVars is defined %}
-          ansibleVars: {{ original_content.data.nodeset.nodes['edpm-' ~ instance].ansible.ansibleVars }}
+{%   set original_node = original_content.data.nodeset.nodes.get(
+       'edpm-' ~ instance,
+       original_content.data.nodeset.nodes.get(instance)
+     ) %}
+{%   if original_node and original_node.ansible.ansibleVars is defined %}
+          ansibleVars: {{ original_node.ansible.ansibleVars }}
 {%   endif %}
         hostName: {{ instance }}
         networks:

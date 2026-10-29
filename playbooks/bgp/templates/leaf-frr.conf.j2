@@ -57,7 +57,7 @@ router bgp {{ leaf_asn | default(64999) }}
   address-family ipv4 unicast
     redistribute connected
     neighbor downlink default-originate
-    neighbor downlink next-hop-self
+    neighbor downlink next-hop-self force
 {% if _downlink_as_mode == 'internal' %}
     neighbor downlink route-reflector-client
 {% endif %}
@@ -70,7 +70,7 @@ router bgp {{ leaf_asn | default(64999) }}
     redistribute connected
     neighbor downlink activate
     neighbor downlink default-originate
-    neighbor downlink next-hop-self
+    neighbor downlink next-hop-self force
 {% if _downlink_as_mode == 'internal' %}
     neighbor downlink route-reflector-client
 {% endif %}
